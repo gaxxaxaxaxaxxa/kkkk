@@ -1,0 +1,235 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학급 청소당번 뽑기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .draw-button {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .draw-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .draw-button:active {
+            transform: translateY(-1px);
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .result-title {
+            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .selected-numbers {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .number-card {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            animation: fadeInScale 0.5s ease forwards;
+            opacity: 0;
+            transform: scale(0.5);
+        }
+
+        @keyframes fadeInScale {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .reset-button {
+            background: #ff4757;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .reset-button:hover {
+            background: #ff3742;
+            transform: translateY(-2px);
+        }
+
+        .info {
+            margin-top: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .drawing {
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 봉담중학교 2-4반 청소당번 뽑기</h1>
+        <button class="draw-button" id="drawButton" onclick="drawNumbers()">
+            청소당번 6명 뽑기!
+        </button>
+        
+        <div class="results" id="results" style="display: none;">
+            <div class="result-title">🎯 선택된 청소당번</div>
+            <div class="selected-numbers" id="selectedNumbers"></div>
+            <button class="reset-button" onclick="resetDraw()">다시 뽑기</button>
+        </div>
+        
+        <div class="info">
+            1번부터 28번까지 학생 중에서<br>
+            랜덤으로 6명을 선택합니다
+        </div>
+    </div>
+
+    <script>
+        let isDrawing = false;
+
+        function drawNumbers() {
+            if (isDrawing) return;
+            
+            isDrawing = true;
+            const drawButton = document.getElementById('drawButton');
+            const results = document.getElementById('results');
+            const selectedNumbers = document.getElementById('selectedNumbers');
+            
+            // 버튼 애니메이션 시작
+            drawButton.classList.add('drawing');
+            drawButton.textContent = '뽑는 중...';
+            drawButton.disabled = true;
+            
+            // 이전 결과 초기화
+            selectedNumbers.innerHTML = '';
+            results.style.display = 'none';
+            
+            // 1.5초 후 결과 표시
+            setTimeout(() => {
+                // 1부터 28까지의 숫자 배열 생성
+                const numbers = Array.from({length: 28}, (_, i) => i + 1);
+                
+                // Fisher-Yates 셔플 알고리즘으로 배열 섞기
+                for (let i = numbers.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+                }
+                
+                // 처음 6개 선택
+                const selected = numbers.slice(0, 6).sort((a, b) => a - b);
+                
+                // 결과 표시
+                selected.forEach((number, index) => {
+                    setTimeout(() => {
+                        const numberCard = document.createElement('div');
+                        numberCard.className = 'number-card';
+                        numberCard.textContent = number + '번';
+                        numberCard.style.animationDelay = `${index * 0.1}s`;
+                        selectedNumbers.appendChild(numberCard);
+                    }, index * 200);
+                });
+                
+                // 결과 영역 표시
+                setTimeout(() => {
+                    results.style.display = 'block';
+                }, 200);
+                
+                // 버튼 원래 상태로 복원
+                drawButton.classList.remove('drawing');
+                drawButton.textContent = '청소당번 6명 뽑기!';
+                drawButton.disabled = false;
+                isDrawing = false;
+            }, 1500);
+        }
+
+        function resetDraw() {
+            const results = document.getElementById('results');
+            const selectedNumbers = document.getElementById('selectedNumbers');
+            
+            results.style.display = 'none';
+            selectedNumbers.innerHTML = '';
+        }
+
+        // 엔터키로도 뽑기 가능
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter' && !isDrawing) {
+                drawNumbers();
+            }
+        });
+    </script>
+</body>
+</html>
